@@ -1,0 +1,17 @@
+services:                      # list of containers to run
+  postgres:                    # name of the first one
+    image: postgres:16         # which software and version
+    environment:               # settings passed to it
+      POSTGRES_USER: app       # database username
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: ecommerce   # database created automatically
+    ports:
+      - "5432:5432"            #  Mac's port : container's port
+    volumes:
+      - pgdata:/var/lib/postgresql/data   # keep data on disk
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+volumes:
+  pgdata:                      # declares the named volume
