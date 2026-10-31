@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { pool } from '../config/db';
 import { redis } from '../config/redis';
 
-
 const router = Router();
 
 router.get('/', async (_req, res) => {
