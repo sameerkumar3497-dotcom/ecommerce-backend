@@ -33,4 +33,25 @@ export const authController = {
       next(err);
     }
   },
+
+  async login(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, password } = req.body ?? {};
+
+      if (
+        typeof email !== 'string' ||
+        typeof password !== 'string' ||
+        email.length === 0 ||
+        password.length === 0 ||
+        password.length > 72
+      ) {
+        throw new AppError(400, 'Email and password are required');
+      }
+
+      const result = await authService.login({ email, password });
+      res.status(200).json(result);
+    } catch (err) {
+      next(err);
+    }
+  },
 };

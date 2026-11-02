@@ -1,9 +1,19 @@
-import { Prisma } from '../generated/prisma/client';
+import { Prisma } from '@prisma/client';
+import { env } from '../config/env';
 import { userRepository } from '../repositories/user.repository';
-import { hashPassword } from '../utils/password';
+import { refreshTokenRepository } from '../repositories/refreshToken.repository';
+import { hashPassword, comparePassword, DUMMY_HASH } from '../utils/password';
+import {
+  signAccessToken,
+  generateRefreshToken,
+  hashToken,
+} from '../utils/tokens';
 import { AppError } from '../utils/AppError';
 
 type RegisterInput = { name: string; email: string; password: string };
+type LoginInput = { email: string; password: string };
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export const authService = {
   async register({ name, email, password }: RegisterInput) {
@@ -31,5 +41,39 @@ export const authService = {
       }
       throw err;
     }
+  },
+
+  async login({ email, password }: LoginInput) {
+    const user = await userRepository.findByEmail(email.trim().toLowerCase());
+
+    // Always run bcrypt, even if the user doesn't exist (keeps timing equal)
+    const passwordOk = await comparePassword(
+      password,
+      user ? user.passwordHash : DUMMY_HASH,
+    );
+
+    if (!user || !passwordOk) {
+      throw new AppError(401, 'Invalid email or password');
+    }
+
+    const accessToken = signAccessToken(user.id, user.role);
+
+    const refreshToken = generateRefreshToken();
+    await refreshTokenRepository.create({
+      userId: user.id,
+      tokenHash: hashToken(refreshToken),
+      expiresAt: new Date(Date.now() + env.refreshTokenTtlDays * DAY_MS),
+    });
+
+    return {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      accessToken,
+      refreshToken,
+    };
   },
 };

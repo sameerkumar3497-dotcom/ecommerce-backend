@@ -9,3 +9,5 @@ export function hashPassword(plain: string): Promise<string> {
 export function comparePassword(plain: string, hash: string): Promise<boolean> {
   return bcrypt.compare(plain, hash);
 }
+
+export const DUMMY_HASH = bcrypt.hashSync('not-a-real-password', SALT_ROUNDS);

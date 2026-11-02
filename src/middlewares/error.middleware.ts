@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { AppError } from '../utils/AppError';
 
 // Express recognises an error handler by its 4 parameters, so _next must stay
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 export function errorHandler(
   err: unknown,
   _req: Request,
