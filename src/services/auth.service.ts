@@ -114,4 +114,9 @@ export const authService = {
     // 5. Issue a fresh pair
     return issueTokens(stored.user);
   },
+
+  async logout(refreshToken: string) {
+    // Silently does nothing if the token is unknown or already revoked
+    await refreshTokenRepository.revokeByHash(hashToken(refreshToken));
+  },
 };

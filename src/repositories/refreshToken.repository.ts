@@ -22,6 +22,15 @@ export const refreshTokenRepository = {
     return count === 1;
   },
 
+  // Used by logout: revoke one token by its hash. Does nothing if it is
+  // unknown or already revoked.
+  revokeByHash(tokenHash: string) {
+    return prisma.refreshToken.updateMany({
+      where: { tokenHash, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  },
+
   revokeAllForUser(userId: string) {
     return prisma.refreshToken.updateMany({
       where: { userId, revokedAt: null },

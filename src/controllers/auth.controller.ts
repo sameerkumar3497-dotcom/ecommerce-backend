@@ -73,4 +73,23 @@ export const authController = {
       next(err);
     }
   },
+
+  async logout(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { refreshToken } = req.body ?? {};
+
+      if (
+        typeof refreshToken !== 'string' ||
+        refreshToken.length === 0 ||
+        refreshToken.length > 200
+      ) {
+        throw new AppError(400, 'Refresh token is required');
+      }
+
+      await authService.logout(refreshToken);
+      res.status(200).json({ message: 'Logged out' });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
