@@ -119,4 +119,17 @@ export const authService = {
     // Silently does nothing if the token is unknown or already revoked
     await refreshTokenRepository.revokeByHash(hashToken(refreshToken));
   },
+
+  async getProfile(userId: string) {
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      // Token was valid but the account no longer exists
+      throw new AppError(401, 'Authentication required');
+    }
+    return user;
+  },
+
+  async logoutAll(userId: string) {
+    await refreshTokenRepository.revokeAllForUser(userId);
+  },
 };

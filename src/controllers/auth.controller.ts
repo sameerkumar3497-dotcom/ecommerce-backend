@@ -92,4 +92,28 @@ export const authController = {
       next(err);
     }
   },
+
+  async me(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        throw new AppError(401, 'Authentication required');
+      }
+      const user = await authService.getProfile(req.user.id);
+      res.status(200).json({ user });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async logoutAll(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) {
+        throw new AppError(401, 'Authentication required');
+      }
+      await authService.logoutAll(req.user.id);
+      res.status(200).json({ message: 'Logged out from all devices' });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
