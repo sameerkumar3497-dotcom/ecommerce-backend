@@ -54,4 +54,23 @@ export const authController = {
       next(err);
     }
   },
+
+  async refresh(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { refreshToken } = req.body ?? {};
+
+      if (
+        typeof refreshToken !== 'string' ||
+        refreshToken.length === 0 ||
+        refreshToken.length > 200
+      ) {
+        throw new AppError(400, 'Refresh token is required');
+      }
+
+      const tokens = await authService.refresh(refreshToken);
+      res.status(200).json(tokens);
+    } catch (err) {
+      next(err);
+    }
+  },
 };
