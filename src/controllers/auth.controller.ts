@@ -1,33 +1,17 @@
 import { NextFunction, Request, Response } from 'express';
 import { authService } from '../services/auth.service';
 import { AppError } from '../utils/AppError';
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import type {
+  LoginInput,
+  RefreshTokenInput,
+  RegisterInput,
+} from '../schemas/auth.schemas';
 
 export const authController = {
   async register(req: Request, res: Response, next: NextFunction) {
     try {
-      const { name, email, password } = req.body ?? {};
-
-      if (
-        typeof name !== 'string' ||
-        name.trim().length === 0 ||
-        name.length > 100
-      ) {
-        throw new AppError(400, 'Name is required (max 100 characters)');
-      }
-      if (typeof email !== 'string' || !EMAIL_REGEX.test(email)) {
-        throw new AppError(400, 'A valid email is required');
-      }
-      if (
-        typeof password !== 'string' ||
-        password.length < 8 ||
-        password.length > 72
-      ) {
-        throw new AppError(400, 'Password must be 8 to 72 characters');
-      }
-
-      const user = await authService.register({ name, email, password });
+      const input: RegisterInput = req.body;
+      const user = await authService.register(input);
       res.status(201).json({ user });
     } catch (err) {
       next(err);
@@ -36,19 +20,8 @@ export const authController = {
 
   async login(req: Request, res: Response, next: NextFunction) {
     try {
-      const { email, password } = req.body ?? {};
-
-      if (
-        typeof email !== 'string' ||
-        typeof password !== 'string' ||
-        email.length === 0 ||
-        password.length === 0 ||
-        password.length > 72
-      ) {
-        throw new AppError(400, 'Email and password are required');
-      }
-
-      const result = await authService.login({ email, password });
+      const input: LoginInput = req.body;
+      const result = await authService.login(input);
       res.status(200).json(result);
     } catch (err) {
       next(err);
@@ -57,16 +30,7 @@ export const authController = {
 
   async refresh(req: Request, res: Response, next: NextFunction) {
     try {
-      const { refreshToken } = req.body ?? {};
-
-      if (
-        typeof refreshToken !== 'string' ||
-        refreshToken.length === 0 ||
-        refreshToken.length > 200
-      ) {
-        throw new AppError(400, 'Refresh token is required');
-      }
-
+      const { refreshToken }: RefreshTokenInput = req.body;
       const tokens = await authService.refresh(refreshToken);
       res.status(200).json(tokens);
     } catch (err) {
@@ -76,16 +40,7 @@ export const authController = {
 
   async logout(req: Request, res: Response, next: NextFunction) {
     try {
-      const { refreshToken } = req.body ?? {};
-
-      if (
-        typeof refreshToken !== 'string' ||
-        refreshToken.length === 0 ||
-        refreshToken.length > 200
-      ) {
-        throw new AppError(400, 'Refresh token is required');
-      }
-
+      const { refreshToken }: RefreshTokenInput = req.body;
       await authService.logout(refreshToken);
       res.status(200).json({ message: 'Logged out' });
     } catch (err) {

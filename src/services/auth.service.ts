@@ -10,8 +10,7 @@ import {
 } from '../utils/tokens';
 import { AppError } from '../utils/AppError';
 
-type RegisterInput = { name: string; email: string; password: string };
-type LoginInput = { email: string; password: string };
+import type { LoginInput, RegisterInput } from '../schemas/auth.schemas';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
