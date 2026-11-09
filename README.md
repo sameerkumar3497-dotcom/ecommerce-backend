@@ -8,4 +8,5 @@ Backend for an e-commerce app built with Node.js, Express, TypeScript, PostgreSQ
 2. Start the databases: `docker compose up -d`
 3. Install packages: `npm install`
 4. Run the server: `npm run dev`
-5. Check `http://localhost:3000/health`
+5. Check `http://localhost:3000/health'
+
