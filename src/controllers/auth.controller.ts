@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { authService } from '../services/auth.service';
-import { AppError } from '../utils/AppError';
+import { UnauthorizedError } from '../utils/AppError';
 import type {
   LoginInput,
   RefreshTokenInput,
@@ -51,7 +51,7 @@ export const authController = {
   async me(req: Request, res: Response, next: NextFunction) {
     try {
       if (!req.user) {
-        throw new AppError(401, 'Authentication required');
+        throw new UnauthorizedError();
       }
       const user = await authService.getProfile(req.user.id);
       res.status(200).json({ user });
@@ -63,7 +63,7 @@ export const authController = {
   async logoutAll(req: Request, res: Response, next: NextFunction) {
     try {
       if (!req.user) {
-        throw new AppError(401, 'Authentication required');
+        throw new UnauthorizedError();
       }
       await authService.logoutAll(req.user.id);
       res.status(200).json({ message: 'Logged out from all devices' });

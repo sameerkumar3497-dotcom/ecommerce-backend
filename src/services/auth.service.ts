@@ -8,7 +8,7 @@ import {
   generateRefreshToken,
   hashToken,
 } from '../utils/tokens';
-import { AppError } from '../utils/AppError';
+import { ConflictError, UnauthorizedError } from '../utils/AppError';
 
 import type { LoginInput, RegisterInput } from '../schemas/auth.schemas';
 
@@ -34,7 +34,7 @@ export const authService = {
 
     const existing = await userRepository.findByEmail(normalizedEmail);
     if (existing) {
-      throw new AppError(409, 'Email is already registered');
+      throw new ConflictError('Email is already registered');
     }
 
     const passwordHash = await hashPassword(password);
@@ -50,7 +50,7 @@ export const authService = {
         err instanceof Prisma.PrismaClientKnownRequestError &&
         err.code === 'P2002'
       ) {
-        throw new AppError(409, 'Email is already registered');
+        throw new ConflictError('Email is already registered');
       }
       throw err;
     }
@@ -66,7 +66,7 @@ export const authService = {
     );
 
     if (!user || !passwordOk) {
-      throw new AppError(401, 'Invalid email or password');
+      throw new UnauthorizedError('Invalid email or password');
     }
 
     const tokens = await issueTokens(user);
@@ -89,25 +89,25 @@ export const authService = {
 
     // 1. Token doesn't exist
     if (!stored) {
-      throw new AppError(401, 'Invalid refresh token');
+      throw new UnauthorizedError('Invalid refresh token');
     }
 
     // 2. Token was already used or logged out: possible theft, revoke everything
     if (stored.revokedAt) {
       await refreshTokenRepository.revokeAllForUser(stored.userId);
-      throw new AppError(401, 'Invalid refresh token');
+      throw new UnauthorizedError('Invalid refresh token');
     }
 
     // 3. Token is too old
     if (stored.expiresAt < new Date()) {
-      throw new AppError(401, 'Refresh token expired');
+      throw new UnauthorizedError('Refresh token expired');
     }
 
     // 4. Atomically mark it used. If someone else got there first, treat it as reuse
     const claimed = await refreshTokenRepository.revokeIfActive(stored.id);
     if (!claimed) {
       await refreshTokenRepository.revokeAllForUser(stored.userId);
-      throw new AppError(401, 'Invalid refresh token');
+      throw new UnauthorizedError('Invalid refresh token');
     }
 
     // 5. Issue a fresh pair
@@ -123,7 +123,7 @@ export const authService = {
     const user = await userRepository.findById(userId);
     if (!user) {
       // Token was valid but the account no longer exists
-      throw new AppError(401, 'Authentication required');
+      throw new UnauthorizedError();
     }
     return user;
   },

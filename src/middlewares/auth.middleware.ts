@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { verifyAccessToken } from '../utils/tokens';
-import { AppError } from '../utils/AppError';
+import { UnauthorizedError } from '../utils/AppError';
 
 export function authenticate(
   req: Request,
@@ -10,7 +10,7 @@ export function authenticate(
   const header = req.headers.authorization;
 
   if (!header || !header.startsWith('Bearer ')) {
-    return next(new AppError(401, 'Authentication required'));
+    return next(new UnauthorizedError());
   }
 
   const token = header.slice('Bearer '.length);
@@ -21,6 +21,6 @@ export function authenticate(
     next();
   } catch {
     // Wrong signature, tampered, malformed or expired
-    next(new AppError(401, 'Invalid or expired token'));
+    next(new UnauthorizedError('Invalid or expired token'));
   }
 }
