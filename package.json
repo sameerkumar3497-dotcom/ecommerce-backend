@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "lint": "eslint src",
     "format": "prettier --write src",
-    "seed:admin": "tsx src/scripts/createAdmin.ts"
+    "seed:admin": "tsx src/scripts/createAdmin.ts",
+    "smoke": "bash scripts/smoke-test.sh"
   },
   "keywords": [],
   "author": "",
