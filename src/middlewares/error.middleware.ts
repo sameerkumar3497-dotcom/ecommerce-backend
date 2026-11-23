@@ -23,7 +23,7 @@ function sendError(
 // Express recognises an error handler by its 4 parameters, so _next must stay
 export function errorHandler(
   err: unknown,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction,
 ): void {
@@ -54,7 +54,7 @@ export function errorHandler(
     }
   }
 
-  // 4. Anything else is a bug: log it privately, tell the client nothing
-  console.error(err);
+  // 4. Anything else is a bug: log it privately (with the request ID), tell the client nothing
+  req.log.error({ err }, 'Unhandled error');
   sendError(res, 500, 'Internal server error');
 }
